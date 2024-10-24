@@ -1,6 +1,5 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet } from 'react-native';
 import { getApps, initializeApp } from 'firebase/app';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -12,6 +11,9 @@ import { getFirestore } from 'firebase/firestore';
 import dashboard from './components/home'; 
 import booking from './components/book';
 import history from './components/history';
+import profile from './components/profile';
+import settings from './components/settings';
+import globalStyles from './globalStyles'; // Import global styles
 
 // Firebase configuration
 const firebaseConfig = {
@@ -39,6 +41,8 @@ export default function App() {
         <Stack.Screen name="Home" component={dashboard} />
         <Stack.Screen name="Booking" component={booking} />
         <Stack.Screen name="History" component={history} />
+        <Stack.Screen name="Profile" component={profile} />
+        <Stack.Screen name="Settings" component={settings} />
       </Stack.Navigator>
     );
   };
@@ -70,17 +74,24 @@ export default function App() {
             headerShown: false
           }} 
         />
+        <Tab.Screen 
+          name="Profile" 
+          component={profile} 
+          options={{
+            tabBarIcon: () => (<Ionicons name="person" size={20} />),
+            headerShown: false
+          }} 
+        />
+        <Tab.Screen 
+          name="Settings" 
+          component={settings} 
+          options={{
+            tabBarIcon: () => (<Ionicons name="settings" size={20} />),
+            headerShown: false
+          }} 
+        />
       </Tab.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

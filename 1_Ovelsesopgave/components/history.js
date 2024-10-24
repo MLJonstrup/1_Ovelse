@@ -1,20 +1,39 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import globalStyles from '../globalStyles'; // Import global styles
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { StatusBar } from 'expo-status-bar';
 
 export default function HistoryComponent() {
   const [pastEvents, setPastEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const db = getFirestore(); // Initialize Firestore
+
+  // Function to parse date in dd/mm/yyyy format
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split('/').map(Number);
+    return new Date(year, month - 1, day); // Month is 0-indexed
+  };
 
   // Function to fetch past bookings from Firestore
   const fetchPastBookings = async () => {
+    setLoading(true); // Set loading state
+    setError(null); // Reset error state
     try {
       const bookingsCollection = collection(db, 'bookings');
       const bookingSnapshot = await getDocs(bookingsCollection);
+
+      // Check if there are any documents
+      if (bookingSnapshot.empty) {
+        console.warn('No bookings found in Firestore.');
+        setPastEvents([]); // Set to empty array if no documents found
+        return; // Exit the function early
+      }
+
       const bookingList = bookingSnapshot.docs.map(doc => ({
-        id: doc.id, // Add Firestore document ID
-        ...doc.data(), // Spread the document data
+        id: doc.id,
+        ...doc.data(),
       }));
 
       // Filter bookings to show only past ones
@@ -30,13 +49,10 @@ export default function HistoryComponent() {
       setPastEvents(pastBookings);
     } catch (e) {
       console.error('Error fetching past bookings: ', e);
+      setError('Failed to load past bookings. Please try again.'); // Set error message
+    } finally {
+      setLoading(false); // Reset loading state
     }
-  };
-
-  // Function to parse date in dd/mm/yyyy format
-  const parseDate = (dateString) => {
-    const [day, month, year] = dateString.split('/').map(Number);
-    return new Date(year, month - 1, day); // Month is 0-indexed
   };
 
   // Fetch past bookings on component mount and set up interval for updates
@@ -51,15 +67,29 @@ export default function HistoryComponent() {
     return () => clearInterval(intervalId);
   }, []);
 
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />; // Show loading spinner
+  }
+
+  if (error) {
+    return (
+      <View style={globalStyles.container}>
+        <Text style={[globalStyles.text, { color: 'red', textAlign: 'center' }]}>{error}</Text> // Show error message
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Past Bookings:</Text>
+    <View style={globalStyles.container}>
+      <Text style={[globalStyles.text, { fontSize: 24, fontWeight: 'bold' }]}>Past Bookings:</Text>
       <FlatList
         data={pastEvents}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.eventItem}>
-            <Text style={styles.eventText}>{item.sport} - {item.date} at {item.time}</Text>
+          <View style={globalStyles.eventItem}>
+            <Text style={[globalStyles.text, globalStyles.eventText]}>
+              {item.sport || 'Unknown Sport'} - {item.date || 'Unknown Date'} at {item.time || 'Unknown Time'}
+            </Text>
           </View>
         )}
       />
@@ -67,30 +97,3 @@ export default function HistoryComponent() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 200,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20, // Space between title and list
-  },
-  eventItem: {
-    marginVertical: 10,
-    padding: 10,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 5,
-    width: '100%',
-    alignItems: 'flex-start',
-  },
-  eventText: {
-    fontSize: 16,
-  },
-});
