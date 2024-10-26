@@ -1,98 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import globalStyles from '../globalStyles'; // Import global styles
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore'; // Import query and where
+import { getAuth } from 'firebase/auth'; // Import Firebase Auth
 import { StatusBar } from 'expo-status-bar';
 
-export default function HistoryComponent() {
+export default function HomeComponent() {
   const [pastEvents, setPastEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const db = getFirestore(); // Initialize Firestore
+  const db = getFirestore();
+  const auth = getAuth(); // Initialize Firebase Auth
+  const userId = auth.currentUser?.uid; // Get current user ID
 
-  // Function to parse date in dd/mm/yyyy format
-  const parseDate = (dateString) => {
-    const [day, month, year] = dateString.split('/').map(Number);
-    return new Date(year, month - 1, day); // Month is 0-indexed
-  };
+  const fetchBookings = async () => {
+    if (!userId) return; // Exit if no user ID found
 
-  // Function to fetch past bookings from Firestore
-  const fetchPastBookings = async () => {
-    setLoading(true); // Set loading state
-    setError(null); // Reset error state
     try {
+      // Query to filter bookings by user ID
       const bookingsCollection = collection(db, 'bookings');
-      const bookingSnapshot = await getDocs(bookingsCollection);
-
-      // Check if there are any documents
-      if (bookingSnapshot.empty) {
-        console.warn('No bookings found in Firestore.');
-        setPastEvents([]); // Set to empty array if no documents found
-        return; // Exit the function early
-      }
+      const q = query(bookingsCollection, where('userId', '==', userId)); // Filter bookings
+      const bookingSnapshot = await getDocs(q); // Get filtered bookings
 
       const bookingList = bookingSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      // Filter bookings to show only past ones
       const today = new Date();
       const pastBookings = bookingList.filter(booking => {
         if (booking.date && typeof booking.date === 'string') {
           const bookingDate = parseDate(booking.date);
-          return bookingDate < today; // Only past bookings
+          return bookingDate < today; // Past bookings
         }
-        return false; // Exclude bookings with undefined or invalid date
+        return false;
+      });
+
+      // Sort pastBookings by date (descending)
+      pastBookings.sort((a, b) => {
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        return dateB - dateA; // Descending order
       });
 
       setPastEvents(pastBookings);
     } catch (e) {
-      console.error('Error fetching past bookings: ', e);
-      setError('Failed to load past bookings. Please try again.'); // Set error message
-    } finally {
-      setLoading(false); // Reset loading state
+      console.error('Error fetching bookings: ', e);
     }
   };
 
-  // Fetch past bookings on component mount and set up interval for updates
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split('/').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   useEffect(() => {
-    fetchPastBookings(); // Initial fetch
+    fetchBookings();
 
     const intervalId = setInterval(() => {
-      fetchPastBookings(); // Fetch every 10 seconds
-    }, 10000); // Adjust the interval time as needed (10000 ms = 10 seconds)
+      fetchBookings();
+    }, 10000);
 
-    // Cleanup interval on unmount
     return () => clearInterval(intervalId);
   }, []);
 
-  if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />; // Show loading spinner
-  }
-
-  if (error) {
-    return (
-      <View style={globalStyles.container}>
-        <Text style={[globalStyles.text, { color: 'red', textAlign: 'center' }]}>{error}</Text> // Show error message
-      </View>
-    );
-  }
-
   return (
     <View style={globalStyles.container}>
-      <Text style={[globalStyles.text, { fontSize: 24, fontWeight: 'bold' }]}>Past Bookings:</Text>
-      <FlatList
-        data={pastEvents}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={globalStyles.eventItem}>
-            <Text style={[globalStyles.text, globalStyles.eventText]}>
-              {item.sport || 'Unknown Sport'} - {item.date || 'Unknown Date'} at {item.time || 'Unknown Time'}
-            </Text>
-          </View>
-        )}
-      />
+      <Text style={globalStyles.text}>Past Bookings:</Text>
+      {pastEvents.length === 0 ? (
+        <Text style={globalStyles.eventText}>No past bookings available.</Text>
+      ) : (
+        <View style={{ maxHeight: 300, width: '100%' }}>
+          <FlatList
+            data={pastEvents}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={globalStyles.eventItem}>
+                <Text style={globalStyles.eventText}>
+                  {item.sport} - {item.date} at {item.time}
+                </Text>
+              </View>
+            )}
+          />
+        </View>
+      )}
       <StatusBar style="auto" />
     </View>
   );

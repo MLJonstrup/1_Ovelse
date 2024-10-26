@@ -1,17 +1,25 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import globalStyles from '../globalStyles'; // Import global styles
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore'; // Import query and where
+import { getAuth } from 'firebase/auth'; // Import Firebase Auth
 import { StatusBar } from 'expo-status-bar';
 
 export default function HomeComponent() {
   const [events, setEvents] = useState([]);
   const db = getFirestore();
+  const auth = getAuth(); // Initialize Firebase Auth
+  const userId = auth.currentUser?.uid; // Get current user ID
 
   const fetchBookings = async () => {
+    if (!userId) return; // Exit if no user ID found
+
     try {
+      // Query to filter bookings by user ID
       const bookingsCollection = collection(db, 'bookings');
-      const bookingSnapshot = await getDocs(bookingsCollection);
+      const q = query(bookingsCollection, where('userId', '==', userId)); // Filter bookings
+      const bookingSnapshot = await getDocs(q); // Get filtered bookings
+
       const bookingList = bookingSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -24,6 +32,13 @@ export default function HomeComponent() {
           return bookingDate >= today;
         }
         return false;
+      });
+
+      // Sort upcomingBookings by date
+      upcomingBookings.sort((a, b) => {
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        return dateA - dateB; // Ascending order
       });
 
       setEvents(upcomingBookings);
@@ -50,15 +65,23 @@ export default function HomeComponent() {
   return (
     <View style={globalStyles.container}>
       <Text style={globalStyles.text}>Upcoming Bookings:</Text>
-      <FlatList
-        data={events}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={globalStyles.eventItem}>
-            <Text style={globalStyles.eventText}>{item.sport} - {item.date} at {item.time}</Text>
-          </View>
-        )}
-      />
+      {events.length === 0 ? (
+        <Text style={globalStyles.eventText}>No upcoming bookings available.</Text>
+      ) : (
+        <View style={{ maxHeight: 300, width: '100%' }}>
+          <FlatList
+            data={events}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={globalStyles.eventItem}>
+                <Text style={globalStyles.eventText}>
+                  {item.sport} - {item.date} at {item.time}
+                </Text>
+              </View>
+            )}
+          />
+        </View>
+      )}
       <StatusBar style="auto" />
     </View>
   );

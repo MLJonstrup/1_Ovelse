@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import globalStyles from '../globalStyles'; // Import global styles
 import { StatusBar } from 'expo-status-bar';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth'; // Import Firebase Auth
 
 export default function BookingComponent() {
   const [selectedSport, setSelectedSport] = useState(''); // State for selected sport
@@ -12,6 +13,8 @@ export default function BookingComponent() {
   const [futureDates, setFutureDates] = useState([]); // State for future dates
   const dateBooked = new Date(); // Current date for booking
   const db = getFirestore(); // Initialize Firestore
+  const auth = getAuth(); // Initialize Firebase Auth
+  const userId = auth.currentUser?.uid; // Get current user ID
 
   const handleBooking = async () => {
     if (!selectedSport || !selectedTime || !selectedDate) {
@@ -25,6 +28,7 @@ export default function BookingComponent() {
         time: selectedTime,
         date: selectedDate,
         dateBooked: dateBooked,
+        userId: userId, // Add user ID to the booking
       });
       alert('Booking successful!');
     } catch (e) {
@@ -53,12 +57,12 @@ export default function BookingComponent() {
 
   return (
     <View style={globalStyles.container}>
-      <Text style={globalStyles.title}>Create booking here:</Text>
+      <Text style={globalStyles.text}>Create booking here:</Text>
 
       <Text style={globalStyles.label}>Select Sport:</Text>
       <Picker
         selectedValue={selectedSport}
-        style={globalStyles.picker}
+        style={{ height: 50, width: '100%' }} // Inline style for Sport Picker
         onValueChange={(itemValue) => setSelectedSport(itemValue)}>
         <Picker.Item label="Select Sport" value="" />
         <Picker.Item label="Soccer" value="soccer" />
@@ -69,7 +73,7 @@ export default function BookingComponent() {
       <Text style={globalStyles.label}>Select Time:</Text>
       <Picker
         selectedValue={selectedTime}
-        style={globalStyles.picker}
+        style={{ height: 50, width: '100%' }} // Inline style for Time Picker
         onValueChange={(itemValue) => setSelectedTime(itemValue)}>
         <Picker.Item label="Select Time" value="" />
         <Picker.Item label="8:00 AM" value="8:00 AM" />
@@ -81,7 +85,7 @@ export default function BookingComponent() {
       <Text style={globalStyles.label}>Select Date:</Text>
       <Picker
         selectedValue={selectedDate}
-        style={globalStyles.picker}
+        style={{ height: 50, width: '100%' }} // Inline style for Date Picker
         onValueChange={(itemValue) => setSelectedDate(itemValue)}>
         <Picker.Item label="Select Date" value="" />
         {futureDates.map((date, index) => (

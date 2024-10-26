@@ -1,17 +1,20 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; // Import Picker
 import globalStyles from '../globalStyles'; // Import global styles
-import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getAuth, signOut } from 'firebase/auth'; // Import signOut from Firebase Auth
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 export default function Profile() {
   const [profile, setProfile] = useState({
     name: '',
     email: '',
-    phone: '',
+    role: 'Client', // Default role
   });
   const [isEditing, setIsEditing] = useState(false);
   const db = getFirestore();
-  const userId = 'user-id'; // Replace with actual user ID
+  const auth = getAuth(); // Initialize Firebase Auth
+  const userId = auth.currentUser?.uid; // Get current user ID
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -19,24 +22,42 @@ export default function Profile() {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setProfile(docSnap.data());
+        setProfile(docSnap.data()); // Pre-fill form with user data
       } else {
-        console.log('No such document!');
+        console.log('No such document! Creating a new profile.');
+        setProfile({
+          name: '',
+          email: '',
+          role: 'Client', // Default role
+        });
       }
     };
 
-    fetchProfile();
-  }, []);
+    if (userId) {
+      fetchProfile();
+    }
+  }, [userId]);
 
   const handleSave = async () => {
     try {
       const docRef = doc(db, 'users', userId);
-      await updateDoc(docRef, profile);
-      alert('Profile updated successfully!');
+      await setDoc(docRef, profile, { merge: true }); // Merge to keep existing data
+
+      alert('Profile saved successfully!');
       setIsEditing(false);
     } catch (e) {
-      console.error('Error updating profile: ', e);
-      alert('Failed to update profile');
+      console.error('Error saving profile: ', e);
+      alert('Failed to save profile');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); // Sign out from Firebase
+      Alert.alert('Logged out successfully!'); // Optional alert for confirmation
+    } catch (error) {
+      console.error('Error during logout: ', error);
+      alert('Failed to log out');
     }
   };
 
@@ -58,19 +79,27 @@ export default function Profile() {
         onChangeText={(text) => setProfile({ ...profile, email: text })}
         placeholder="Email"
       />
-      <TextInput
-        style={globalStyles.input}
-        value={profile.phone}
-        editable={isEditing}
-        onChangeText={(text) => setProfile({ ...profile, phone: text })}
-        placeholder="Phone"
-      />
+      
+      {/* Picker for Role Selection */}
+      {isEditing && (
+        <Picker
+          selectedValue={profile.role}
+          style={{ height: 50, width: '100%' }} // Ensure the Picker has a defined height and width
+          onValueChange={(itemValue) => setProfile({ ...profile, role: itemValue })}
+        >
+          <Picker.Item label="Trainer" value="Trainer" />
+          <Picker.Item label="Client" value="Client" />
+        </Picker>
+      )}
 
       {isEditing ? (
         <Button title="Save" onPress={handleSave} />
       ) : (
         <Button title="Edit" onPress={() => setIsEditing(true)} />
       )}
+
+      {/* Logout Button */}
+      <Button title="Logout" onPress={handleLogout} color="red" />
     </View>
   );
 }
