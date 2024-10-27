@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList } from 'react-native';
-import globalStyles from '../globalStyles'; // Import global styles
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore'; // Import query and where
-import { getAuth } from 'firebase/auth'; // Import Firebase Auth
+import globalStyles from '../globalStyles'; 
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth'; 
 import { StatusBar } from 'expo-status-bar';
 
 export default function HomeComponent() {
   const [events, setEvents] = useState([]);
   const db = getFirestore();
-  const auth = getAuth(); // Initialize Firebase Auth
-  const userId = auth.currentUser?.uid; // Get current user ID
+  const auth = getAuth(); 
+  const userId = auth.currentUser?.uid; 
 
   const fetchBookings = async () => {
-    if (!userId) return; // Exit if no user ID found
+    if (!userId) return; 
 
     try {
-      // Query to filter bookings by user ID
       const bookingsCollection = collection(db, 'bookings');
-      const q = query(bookingsCollection, where('userId', '==', userId)); // Filter bookings
-      const bookingSnapshot = await getDocs(q); // Get filtered bookings
+      const q = query(bookingsCollection, where('userId', '==', userId)); 
+      const bookingSnapshot = await getDocs(q); 
 
       const bookingList = bookingSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -34,11 +33,10 @@ export default function HomeComponent() {
         return false;
       });
 
-      // Sort upcomingBookings by date
       upcomingBookings.sort((a, b) => {
         const dateA = parseDate(a.date);
         const dateB = parseDate(b.date);
-        return dateA - dateB; // Ascending order
+        return dateA - dateB; 
       });
 
       setEvents(upcomingBookings);

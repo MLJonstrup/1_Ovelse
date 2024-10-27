@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // Import Picker
+import { Picker } from '@react-native-picker/picker'; 
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc } from 'firebase/firestore'; // Import Firestore methods
+import { getFirestore, doc, setDoc } from 'firebase/firestore'; 
 import globalStyles from '../globalStyles';
 
 export default function Signup({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userType, setUserType] = useState('client'); // Default to 'client'
+  const [userType, setUserType] = useState('client'); 
   const auth = getAuth();
-  const db = getFirestore(); // Initialize Firestore
+  const db = getFirestore(); 
 
+  //signup funktion via birebase authenticator
   const handleSignup = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Create user profile in Firestore with userType
+     
       await setDoc(doc(db, 'users', user.uid), {
         email: user.email,
-        userType: userType, // Save the selected user type
+        userType: userType, 
       });
 
       alert('Account created successfully!');
@@ -48,11 +49,11 @@ export default function Signup({ navigation }) {
         onChangeText={setPassword}
       />
       
-      {/* User Type Picker */}
+      {/* Add Picker for user type */}
       <Text style={globalStyles.text}>Select User Type:</Text>
       <Picker
         selectedValue={userType}
-        style={globalStyles.input} // Style it as an input
+        style={globalStyles.input} 
         onValueChange={(itemValue) => setUserType(itemValue)}
       >
         <Picker.Item label="Client" value="client" />

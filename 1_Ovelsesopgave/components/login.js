@@ -8,6 +8,7 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState('');
   const auth = getAuth();
 
+  //login funktion
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then(userCredential => {

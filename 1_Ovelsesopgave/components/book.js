@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import globalStyles from '../globalStyles'; // Import global styles
+import globalStyles from '../globalStyles'; 
 import { StatusBar } from 'expo-status-bar';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth'; // Import Firebase Auth
+import { getAuth } from 'firebase/auth'; 
 
 export default function BookingComponent() {
-  const [selectedSport, setSelectedSport] = useState(''); // State for selected sport
-  const [selectedTime, setSelectedTime] = useState(''); // State for selected time
-  const [selectedDate, setSelectedDate] = useState(''); // State for selected date
-  const [futureDates, setFutureDates] = useState([]); // State for future dates
-  const dateBooked = new Date(); // Current date for booking
-  const db = getFirestore(); // Initialize Firestore
-  const auth = getAuth(); // Initialize Firebase Auth
-  const userId = auth.currentUser?.uid; // Get current user ID
+  const [selectedSport, setSelectedSport] = useState('');
+  const [selectedTime, setSelectedTime] = useState(''); 
+  const [selectedDate, setSelectedDate] = useState('');
+  const [futureDates, setFutureDates] = useState([]); 
+  const dateBooked = new Date();
+  const db = getFirestore(); 
+  const auth = getAuth();
+  const userId = auth.currentUser?.uid; 
 
   const handleBooking = async () => {
     if (!selectedSport || !selectedTime || !selectedDate) {
-      alert('Please select sport, time, and date for booking.'); // Alert if any selection is missing
+      alert('Please select sport, time, and date for booking.');
       return;
     }
     
@@ -28,7 +28,7 @@ export default function BookingComponent() {
         time: selectedTime,
         date: selectedDate,
         dateBooked: dateBooked,
-        userId: userId, // Add user ID to the booking
+        userId: userId, 
       });
       alert('Booking successful!');
     } catch (e) {
@@ -62,7 +62,7 @@ export default function BookingComponent() {
       <Text style={globalStyles.label}>Select Sport:</Text>
       <Picker
         selectedValue={selectedSport}
-        style={{ height: 50, width: '100%' }} // Inline style for Sport Picker
+        style={{ height: 50, width: '100%' }} 
         onValueChange={(itemValue) => setSelectedSport(itemValue)}>
         <Picker.Item label="Select Sport" value="" />
         <Picker.Item label="Soccer" value="soccer" />
@@ -73,7 +73,7 @@ export default function BookingComponent() {
       <Text style={globalStyles.label}>Select Time:</Text>
       <Picker
         selectedValue={selectedTime}
-        style={{ height: 50, width: '100%' }} // Inline style for Time Picker
+        style={{ height: 50, width: '100%' }} 
         onValueChange={(itemValue) => setSelectedTime(itemValue)}>
         <Picker.Item label="Select Time" value="" />
         <Picker.Item label="8:00 AM" value="8:00 AM" />
@@ -85,7 +85,7 @@ export default function BookingComponent() {
       <Text style={globalStyles.label}>Select Date:</Text>
       <Picker
         selectedValue={selectedDate}
-        style={{ height: 50, width: '100%' }} // Inline style for Date Picker
+        style={{ height: 50, width: '100%' }}
         onValueChange={(itemValue) => setSelectedDate(itemValue)}>
         <Picker.Item label="Select Date" value="" />
         {futureDates.map((date, index) => (

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Text, View, Switch } from 'react-native';
-import globalStyles from '../globalStyles'; // Adjust the path as necessary
+import globalStyles from '../globalStyles'; 
 
 export default function Settings() {
   const [isDarkMode, setIsDarkMode] = React.useState(false);
 
+  //darkmode virker ikke
   const toggleTheme = () => {
     setIsDarkMode(previousState => !previousState);
   };

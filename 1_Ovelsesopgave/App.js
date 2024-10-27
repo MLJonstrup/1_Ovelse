@@ -9,15 +9,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { getFirestore } from 'firebase/firestore';
 import { View, Text, TextInput, Button } from 'react-native';
 import globalStyles from './globalStyles';
-
-// Import your components
 import dashboard from './components/home'; 
 import booking from './components/book';
 import history from './components/history';
 import profile from './components/profile';
 import settings from './components/settings';
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyADvL16QaGmXg8ezO35f2SHfuS7b-JOvfE",
   authDomain: "ovelseinnt.firebaseapp.com",
@@ -27,7 +24,7 @@ const firebaseConfig = {
   appId: "1:650756283665:web:3aedccd7112f60a494c0b0",
 };
 
-// Initialize Firebase if not already initialized
+// Opstart af Firebase
 if (!getApps().length) {
   initializeApp(firebaseConfig);
 }
@@ -37,6 +34,7 @@ const db = getFirestore();
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+//Login function
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -76,6 +74,7 @@ export default function App() {
     return unsubscribe;
   }, []);
 
+  //Navigationen er herunder
   const StackNavigation = () => (
     <Stack.Navigator>
       <Stack.Screen name="Home" component={dashboard} />

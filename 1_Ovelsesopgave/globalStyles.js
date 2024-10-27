@@ -10,17 +10,33 @@ const globalStyles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 20,
   },
-  lightContainer: {
-    backgroundColor: '#fff',
+  input: {
+    padding: 10,
+    margin: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    width: '100%',
+    backgroundColor: '#f9f9f9',
   },
-  darkContainer: {
-    backgroundColor: '#333',
+  inputEditable: {
+    backgroundColor: '#e0f7fa', 
+    color: '#00796b',
+    borderColor: '#00796b',
   },
-  lightText: {
-    color: '#000',
+  picker: {
+    height: 50,
+    width: '100%',
+    marginVertical: 10,
   },
-  darkText: {
-    color: '#fff',
+  button: {
+    padding: 10,
+    marginVertical: 15,
+    borderRadius: 10,
+    backgroundColor: '#007BFF',
+  },
+  buttonPressed: {
+    backgroundColor: '#0056b3',
   },
 });
 
