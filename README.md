@@ -7,7 +7,11 @@ Her er et par ting som er gode at vide.
 3. Jeg har selv brugt følgende komando for at åbne: npx expo start --tunnel  ved ikke om det 
 4. Jeg prøvede at lave dark mode, men det virkede ikke. Login, logud, opret bruger og ændring af bruger virker + lokation.
 
-Jeg tjekkede om det her virkede, men der lod til at være nogle problemer med node_modules... Jeg fandt aldrig ud af hvad der var galt, men det virkede til sidst. 
-Overvej at brug .zip filen istedet. Ellers kan appen ses i video og koden er tilgængelig. 
+Jeg tjekkede om det her virkede, men der lod til at være nogle problemer med node_modules... 
+Følgende virkede for mig: 
+    npm cache clean --force
+    rm -rf node_modules package-lock.json
+    npm install
+    npx expo install expo
 
 Held og lykke :)
