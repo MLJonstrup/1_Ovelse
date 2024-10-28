@@ -7,8 +7,7 @@ Her er et par ting som er gode at vide.
 3. Jeg har selv brugt følgende komando for at åbne: npx expo start --tunnel  ved ikke om det 
 4. Jeg prøvede at lave dark mode, men det virkede ikke. Login, logud, opret bruger og ændring af bruger virker + lokation.
 
-Jeg tjekkede om det her virkede, men der lod til at være nogle problemer med node_modules... 
-Følgende virkede for mig: 
+Jeg have nogle problemer med node_modules efter at have slettet dem, men følgende virkede for mig: 
     npm cache clean --force
     rm -rf node_modules package-lock.json
     npm install
