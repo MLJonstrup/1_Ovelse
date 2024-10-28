@@ -13,4 +13,4 @@ Jeg have nogle problemer med node_modules efter at have slettet dem, men følgen
     npm install
     npx expo install expo
 
-Held og lykke :)
+Held og lykke!
